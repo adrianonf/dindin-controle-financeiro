@@ -12,9 +12,6 @@ function ProtectedRoutes({ redirectTo }) {
 }
 
 function MainRoutes() {
-
-
-
   return (
     <Routes>
 

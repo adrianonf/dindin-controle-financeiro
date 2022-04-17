@@ -1,35 +1,46 @@
 import logo from '../../assets/logo.svg';
-import { Link, useNavigate, navigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import './style.css';
 import api from '../../services/api';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { setItem } from '../../utils/localStorage';
 
 function SignUp() {
-  const [form, setForm] = useState({ nome: '', email: '', senha: '', senhaRepetida: '' });
+  const [name, setName] = useState('');
+  const [password, setPassword] = useState('');
+  const [validatePassword, setValidatePassword] = useState('');
+  const [email, setEmail] = useState('');
+
+  let navigate = useNavigate();
   
- 
 
   async function handleAddItem(e) {
     e.preventDefault();
     
-    if (form.senha !== form.senhaRepetida) {
+    if (password !== validatePassword) {
       return;
     }
 
     try {
+
       const response = await api.post('/usuario', {
-       nome: form.nome,
-       email: form.email,
-       senha: form.senha,
+       nome: name,
+       email: email,
+       senha: password,
           }
       );
-      setItem(response.data);
-      setForm({ name: '', email: '', senha: '', senhaRepetida: '' });
+      
+      // setForm({ nome: '', email: '', senha: '', senhaRepetida: '' });
+      
+      
+      navigate('/');   
+      
+          
     } catch (error) {
-
+      console.log(error);
     }
   }
+ 
 
 
   return (
@@ -44,8 +55,8 @@ function SignUp() {
               Nome
               <input
                 type="text"
-                value={form.nome}
-                onChange={(e) => setForm({...form, nome: e.target.value})}
+                value={name}
+                onChange={(e) => setName(e.target.value)}
               />
             </label>
 
@@ -53,8 +64,8 @@ function SignUp() {
               E-mail
               <input
                 type="text"
-                value={form.email}
-                onChange={(e) => setForm({...form, email: e.target.value})}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
               />
             </label>
 
@@ -62,8 +73,8 @@ function SignUp() {
               Senha
               <input
                 type="password"
-                value={form.senha}
-                onChange={(e) => setForm({...form, senha: e.target.value})}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
               />
             </label>
 
@@ -71,8 +82,8 @@ function SignUp() {
               Confirmação de senha
               <input
                 type="password"
-                value={form.senhaRepetida}
-                onChange={(e) => setForm({...form, senhaRepetida: e.target.value})}
+                value={validatePassword}
+                onChange={(e) => setValidatePassword(e.target.value)}
               />
             </label>
 

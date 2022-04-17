@@ -1,9 +1,10 @@
 .filter-select {
   
-  padding: 30px;
+  padding: 20px;
 
   position: relative;
 
+  
   height: 197px;
 
   background: #fafafa;
@@ -30,9 +31,13 @@
 
   flex-wrap: wrap;
 
-  width: 400px;
-  height: 100px;
+  margin-top: 10px;
+  margin-bottom: 10px;
 
+  max-width: 900px;
+  height: 50px;
+
+  
  
 }
 
@@ -50,11 +55,11 @@
   margin-right: 12px;
 }
 
-.selected-categorie button {
+.selected-category button {
   background-color: #7978d9;
 }
 
-.non-selected-categorie button {
+.non-selected-category button {
   background-color: #fafafa;
 }
 

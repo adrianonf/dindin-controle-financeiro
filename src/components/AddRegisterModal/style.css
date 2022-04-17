@@ -111,6 +111,26 @@
   font-size: 18px;
 }
 
+#select {
+  width: 485px;
+  height: 63px;
+
+  margin-bottom: 40px;
+  margin-top: 10px;
+
+  border: 1px solid #555555;
+  box-sizing: border-box;
+  border-radius: 5px;
+
+  padding: 10px;
+
+  font-size: 18px;
+
+  background-color: white;
+
+  color: black;
+}
+
 .modal-inputs button {
   border: none;
   border-radius: 5px;

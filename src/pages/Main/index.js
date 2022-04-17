@@ -10,7 +10,7 @@ import './style.css';
 import { useEffect, useState } from 'react';
 import EditModal from '../../components/EditModal/index';
 import AddRegister from '../../components/AddRegisterModal';
-import { clearAll } from '../../utils/localStorage';
+import { clearAll, getItem } from '../../utils/localStorage';
 import api from '../../services/api';
 import EditRegister from '../../components/EditRegisterModal';
 
@@ -20,17 +20,63 @@ function Main() {
   const [addRegisterModal, setAddRegisterModal] = useState(false);
   const [editRegisterModal, setEditRegisterModal] = useState(false);
   const [filterModal, setFilterModal] = useState(false);
-  const [userInfo, setUserInfo] = useState({ nome: '', email: '', senha: '', senhaRepetida: '' });
-  
-  async function handleGetInfo() {
-    const response = await api.get('/usuario', {
+  const [name, setName] = useState('');
+  const [category, setCategory] = useState([]);
+  const [userInfo, setUserInfo] = useState({ nome: '', email: '' });
+  const [transaction, setTransaction] = useState([]);
+  const [currentTransaction, setCurrentTransaction] = useState(null);
 
-    })
+  const token = getItem('token');
+
+  function getDayOfWeek(date) {
+    const days = ['Domingo', 'Segunda', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
+    const d = new Date(date);
+    return days[d.getDay()];
+  }
+
+  async function handleGetTransactions() {
+    try {
+      const response = await api.get('/transacao', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+      setTransaction(response.data);
+    } catch (error) {
+      console.log(error.message);
+    }
   }
 
   useEffect(() => {
-    
+    handleGetTransactions();
   }, [])
+
+
+  async function handleGetCategories() {
+    try {
+      const response = await api.get('/categoria', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+      setCategory(response.data);
+    } catch (error) {
+      console.log(error.message);
+    }
+  }
+
+  async function handleDeleteTransaction() {
+
+    try {
+      await api.delete(`/transacao/`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+    } catch (error) {
+      console.log(error.message);
+    }
+  }
 
   return (
     <div className="container-main">
@@ -42,11 +88,11 @@ function Main() {
             alt="user icon"
             onClick={() => setShowEditModal(true)}
           />
-          <span>Nome</span>
-          <img 
-          src={exitIcon} 
-          alt="exit icon" 
-          onClick={() => clearAll()}
+          <span>{name}</span>
+          <img
+            src={exitIcon}
+            alt="exit icon"
+            onClick={() => clearAll()}
           />
         </div>
       </div>
@@ -54,9 +100,9 @@ function Main() {
         <div className="container-list">
           <button onClick={() => setFilterModal(filterModal ? false : true)}><img src={filterIcon} alt="filter Icon" /> Filtrar</button>
           <div className="filter">
-            <Filter 
-            showModal={filterModal}
-            setShowModal={setFilterModal}
+            <Filter
+              showModal={filterModal}
+              setShowModal={setFilterModal}
             />
           </div>
           <div className="table-list">
@@ -69,25 +115,31 @@ function Main() {
                 <th>Valor</th>
                 <th></th>
               </tr>
-              <tr>
-                <td>22/02/2022</td>
-                <td>Segunda</td>
-                <td>Qualquer coisa</td>
-                <td>Cabelo</td>
-                <td>500</td>
-                <td className='table-icons'>
-                  <img
-                    src={editIcon}
-                    alt="edit icon"
-                    onClick={() => setEditRegisterModal(true)}
-                  />
-                  <img
-                    src={trashIcon}
-                    alt="trash icon"
-                    onClick={() => setDeleteModal(true)}
-                  />
-                </td>
-              </tr>
+              {transaction.map((val, key) => {
+                return (
+                  <tr key={key}>
+                    <td>{val.data.slice(0, 10).split('-').reverse().join('/')}</td>
+                    <td>{getDayOfWeek(val.data)}</td>
+                    <td>{val.descricao}</td>
+                    <td>{val.categoria_nome}</td>
+                    <td>{(val.valor).toLocaleString("pt-BR", { style: 'currency', currency: 'BRL' })}</td>
+                    <td
+                      className='table-icons'
+                    >
+                      <img
+                        src={editIcon}
+                        alt="edit icon"
+                        onClick={() => setEditRegisterModal(true) & setCurrentTransaction(val.id)}
+                      />
+                      <img
+                        src={trashIcon}
+                        alt="trash icon"
+                        onClick={() => setDeleteModal(true)}
+                      />
+                    </td>
+                  </tr>
+                )
+              })}
             </table>
             {showDeleteModal &&
               <div className='delete-modal'>
@@ -125,6 +177,7 @@ function Main() {
         showModal={showEditModal}
         setShowModal={setShowEditModal}
         userInfo={userInfo}
+        setCurrentName={setName}
       />
       <AddRegister
         showModal={addRegisterModal}
@@ -133,9 +186,8 @@ function Main() {
       <EditRegister
         showModal={editRegisterModal}
         setShowModal={setEditRegisterModal}
+        currentTransaction={currentTransaction}
       />
-
-
     </div>
   );
 }

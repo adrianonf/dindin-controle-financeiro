@@ -1,36 +1,77 @@
-import handleCloseModal from '../../utils/functions';
 import closeIcon from '../../assets/closeIcon.svg';
 import './style.css';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import api from '../../services/api';
+import { getItem } from '../../utils/localStorage';
+import { useNavigate } from 'react-router-dom';
 
-function Modal({ showModal, setShowModal }) {
-  const [form, setForm] = useState({ nome: '', email: '', senha: '', senhaRepetida: '' });
+function Modal({ showModal, setShowModal, setCurrentName }) {
+
+  const [name, setName] = useState('');
+  const [password, setPassword] = useState('');
+  const [validatePassword, setValidatePassword] = useState('');
+  const [email, setEmail] = useState('');
+  const [currentUser, setCurrentUser] = useState('');
+
+  const token = getItem('token');
+  const navigate = useNavigate();
 
   function handleCloseModal() {
     setShowModal(false);
   }
 
+  async function getUsers() {
 
-  async function handleEditItem(e) {
+    const getDataUsers = await api.get('/usuario', {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    const { nome, email } = getDataUsers.data;
+    console.log(nome, email);
+    setName(nome);
+    setEmail(email);
+    setCurrentName(nome);
+  }
+
+
+  useEffect(() => {   
+    getUsers();
+  }, [])
+
+
+  async function handleEditProfile(e) {
     e.preventDefault();
-    
-    if (form.senha !== form.senhaRepetida) {
+
+    if (password !== validatePassword) {
       return;
     }
-    
+
     try {
-      const response = await api.put('/usuario', {
-       nome: form.nome,
-       email: form.email,
-       senha: form.senha,
-       senhaRepetida: form.senhaRepetida
-      });
-
+      const dataUsers = {
+        nome: name,
+        email: email,
+        senha: password
+      }
+      const updatedUser = await api.put('/usuario',
+        {
+          ...dataUsers
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        }
+      );
+      setCurrentUser(updatedUser.data);
       
-      setForm({ name: '', email: '', senha: '', senhaRepetida: '' });
-    } catch (error) {
+      handleCloseModal(false)
+      navigate('/main');
+      getUsers();
 
+    } catch (error) {
+      console.log(error.message);
     }
   }
 
@@ -47,36 +88,40 @@ function Modal({ showModal, setShowModal }) {
             />
 
             <div className="modal-inputs">
-              <form onSubmit=''>
+              <form onSubmit={handleEditProfile}>
                 <label>
                   Nome
-                  <input 
-                  type="text" 
-                  value={form.nome}
+                  <input
+                    type="text"
+                    defaultValue={name}
+                    onChange={(e) => setName(e.target.value)}
                   />
                 </label>
 
                 <label>
                   E-mail
-                  <input 
-                  type="text"
-                  value={form.email}
+                  <input
+                    type="text"
+                    defaultValue={email}
+                    onChange={(e) => setEmail(e.target.value)}
                   />
                 </label>
 
                 <label>
                   Senha
-                  <input 
-                  type="password"
-                  value={form.senha}
+                  <input
+                    type="password"
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder='Digite sua senha'
                   />
                 </label>
 
                 <label>
                   Confirmação de senha
-                  <input 
-                  type="password"
-                  value={form.senhaRepetida}
+                  <input
+                    type="password"
+                    onChange={(e) => setValidatePassword(e.target.value)}
+                    placeholder='Confirme sua senha'
                   />
                 </label>
 

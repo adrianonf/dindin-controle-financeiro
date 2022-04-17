@@ -108,6 +108,7 @@
 
 .table-list {
   width: 1400px;
+  height: 50px;
 
   position: relative;
 }

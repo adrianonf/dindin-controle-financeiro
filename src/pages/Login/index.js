@@ -35,10 +35,10 @@ function Login() {
         }
       );
 
-      const { token } = response.data;
+      const { token, usuario } = response.data;
       setItem('token', token);
-
-      navigate('/main')
+      setItem('userId', usuario.id);
+      navigate('/main');
     } catch (error) {
         console.log(error.message);
     }

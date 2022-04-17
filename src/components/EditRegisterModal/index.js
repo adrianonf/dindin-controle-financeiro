@@ -1,15 +1,66 @@
-import handleCloseModal from '../../utils/functions';
 import closeIcon from '../../assets/closeIcon.svg';
 import './style.css';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import api from '../../services/api';
+import { getItem } from '../../utils/localStorage';
 
-function EditRegisterModal({ showModal, setShowModal }) {
+function EditRegisterModal({ showModal, setShowModal, currentTransaction }) {
   const [selectedButton, setSelectedButton] = useState('Entrada');
+  const [value, setValue] = useState('');
+  const [description, setDescription] = useState('');
+  const [date, setDate] = useState('');
+  const [category, setCategory] = useState([]);
+  const [categoryId, setCategoryId] = useState(1);
 
+  const token = getItem('token');
 
   function handleCloseModal() {
     setShowModal(false);
   }
+
+  async function handleGetTransaction() {
+    try {
+      const response = await api.get('/transaction', {
+        valor: value,
+        categoria: category,
+        data: date,
+        descricao: description,
+        categoria_id: categoryId,
+        tipo: selectedButton
+      },
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+    } catch (error) {
+      console.log(error.message);
+    }
+
+  }
+
+  async function handleChangeTransaction(e) {
+    e.preventDefault();
+
+    try {
+      const response = await api.put(`/transaction/${currentTransaction.id}`, {
+        valor: value,
+        categoria: category,
+        data: date,
+        descricao: description,
+        categoria_id: categoryId,
+        tipo: selectedButton
+      })
+    } catch (error) {
+      console.log(error.message); 
+    }
+
+  }
+
+  useEffect(() => {
+    handleGetTransaction();
+  }, [])
 
 
 
@@ -30,25 +81,37 @@ function EditRegisterModal({ showModal, setShowModal }) {
             </div>
 
             <div className="modal-inputs">
-              <form onSubmit=''>
+              <form onSubmit={handleChangeTransaction}>
                 <label>
-                  Nome
-                  <input type="text" />
+                  Valor
+                  <input 
+                  type="text"
+                  onChange={(e) => setValue(e.target.value)}
+                  />
                 </label>
 
                 <label>
-                  E-mail
-                  <input type="text" />
+                  Categoria
+                  <input 
+                  type="text"
+                  onChange={(e) => setCategory(e.target.value)}
+                  />
                 </label>
 
                 <label>
-                  Senha
-                  <input type="password" />
+                  Data
+                  <input 
+                  type="date"
+                  onChange={(e) => setDate(e.target.value)}
+                  />
                 </label>
 
                 <label>
-                  Confirmação de senha
-                  <input type="password" />
+                  Descrição
+                  <input 
+                  type="text"
+                  onChange={(e) => setDescription(e.target.value)}
+                  />
                 </label>
 
                 <button>Confirmar</button>

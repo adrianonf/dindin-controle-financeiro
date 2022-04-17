@@ -1,17 +1,19 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import './index.css';
 import MainRoutes from './routes';
 import { BrowserRouter } from 'react-router-dom';
 
+const rootElement = document.getElementById('root');
+const root = createRoot(rootElement);
 
-ReactDOM.render(
+
+root.render(
   <React.StrictMode>
     <BrowserRouter>
       <MainRoutes />
     </BrowserRouter>
-  </React.StrictMode>,
-  document.getElementById('root')
+  </React.StrictMode>  
 );
 
 
